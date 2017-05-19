@@ -13,11 +13,56 @@ const postcssBrowserReporter = require('postcss-browser-reporter');
 const htmlhint = require("gulp-htmlhint");
 const htmlmin = require('gulp-htmlmin');
 const imagemin = require('gulp-imagemin');
-// const uglify = require('gulp-uglify');
+const uglify = require('gulp-uglify');
+const pump = require('pump');
 const postcssFlexbugsFixes = require('postcss-flexbugs-fixes');
-// const sourcemaps = require('gulp-sourcemaps'); yarn add
+// const sourcemaps = require('gulp-sourcemaps');
+const rigger = require('gulp-rigger');
+const postcssPropertyLookup = require('postcss-property-lookup');
+const babel = require('gulp-babel');
 
 
+
+// gulp.task('default', () => {
+//     return gulp.src('.src/js/**/*.js')
+//         .pipe(babel({
+//             presets: ['es2015']
+//         }))
+//         .pipe(gulp.dest('dist'));
+// });
+
+
+
+
+
+gulp.task('jsmin', function (cb) {
+  pump([
+        gulp.src('./src/js/**/*.js'),
+        babel({
+            presets: ['es2015']
+        }),
+        uglify(),
+        rename({
+            suffix: '.min'
+        }),
+        gulp.dest('./build/js')
+    ],
+    cb
+  );
+});
+
+
+
+
+// html build
+gulp.task('htmlbuild', function() {
+    gulp.src('./src/*.html')
+        .pipe(rigger())
+        .pipe(rename({
+            suffix: '.full'
+        }))
+        .pipe(gulp.dest('./src'))
+});
 
 
 
@@ -56,12 +101,11 @@ gulp.task('css', function(done) {
         postcssBrowserReporter(),
         postcssReporter()
     ];
-    return gulp.src('./src/style/*.scss')
+    return gulp.src('./src/style/**/*.scss')
         .pipe(postcss(processors))
         .on('error', done)
         .pipe(rename('main.css'))
         .pipe(gulp.dest('./src/style'))
-    // .pipe(gulp.dest('./build/style'))
 });
 
 
@@ -75,7 +119,7 @@ gulp.task('imgmin', () =>
 );
 // minify css
 gulp.task('cssnano', function() {
-    return gulp.src('./build/style/main.css')
+    return gulp.src('./src/style/main.css')
         .pipe(cssnano())
         .pipe(rename({
             suffix: '.min'
@@ -84,7 +128,7 @@ gulp.task('cssnano', function() {
 });
 // minify html
 gulp.task('htmlmin', function() {
-    return gulp.src('./src/*.html')
+    return gulp.src('./src/*full.html')
         .pipe(htmlmin({
             collapseWhitespace: true
         }))
@@ -93,11 +137,12 @@ gulp.task('htmlmin', function() {
         }))
         .pipe(gulp.dest('./build'));
 });
+// minify all
+gulp.task('build', ['htmlmin', 'cssnano', 'imgmin']);
 
 
 
-
-
+// linter+compiler
 gulp.task('default', function() {
     gulp.watch('./src/style/**/*.scss', ['css']);
     gulp.watch('./src/*.html', ['htmlhint']);
