@@ -1,0 +1,26 @@
+/*Ctrl+Shift+S => sorting*/
+@import "../../node_modules/reset.css/reset.css";
+
+$blufe: #df2;
+$column: 200px;
+
+body {
+    display: flex;
+    background-image: resolve("testimg.png");
+    // background-image: url("../img/testimg.png");
+    color: $blufe;
+    font-family: "Nova Mono";
+}
+
+div {
+    position: relative;
+    flex: 1;
+    display: block;
+    margin: 9px 0 0;
+    padding: 0 0 0 2px;
+    color: #fff!important;
+}
+a,
+div {
+    display: block;
+}
